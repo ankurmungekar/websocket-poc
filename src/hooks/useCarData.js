@@ -1,19 +1,31 @@
 import { useState, useEffect, useRef } from 'react';
 
-const WS_URL = 'ws://localhost:8080';
+// Use environment variable for production, fallback to localhost for dev
+const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8080';
 
 const INITIAL_CAR = {
-  car_id: 'CAR-001',
-  latitude: 19.0760,
-  longitude: 72.8777,
+  car_id: '353742376437570',
+  imei: '353742376437570',
+  latitude: 18.5425,
+  longitude: 73.9396,
   speed_kmh: 0,
-  status: 'idle',
-  heading: 0,
+  status: 'stopped',
+  heading: 155,
+  altitude: 567,
+  odometer: 0,
+  todays_distance: 0,
+  device_type: 'Teltonika',
+  acc_status: 0,
+  agetime: '--',
+  datetime: '--',
   timestamp: new Date().toISOString(),
 };
 
 export function useCarData() {
   const [carData, setCarData] = useState(INITIAL_CAR);
+  const [routeHistory, setRouteHistory] = useState([
+    { lat: INITIAL_CAR.latitude, lng: INITIAL_CAR.longitude, timestamp: INITIAL_CAR.timestamp, status: INITIAL_CAR.status },
+  ]);
   const [isConnected, setIsConnected] = useState(false);
   const wsRef = useRef(null);
   const reconnectTimeout = useRef(null);
@@ -33,6 +45,23 @@ export function useCarData() {
         try {
           const data = JSON.parse(event.data);
           setCarData(data);
+
+          // Only add to history if position actually changed
+          setRouteHistory((prev) => {
+            const last = prev[prev.length - 1];
+            if (last && last.lat === data.latitude && last.lng === data.longitude) {
+              return prev; // No position change, skip
+            }
+            return [
+              ...prev,
+              {
+                lat: data.latitude,
+                lng: data.longitude,
+                timestamp: data.timestamp,
+                status: data.status,
+              },
+            ];
+          });
         } catch (err) {
           console.error('Failed to parse message:', err);
         }
@@ -58,5 +87,5 @@ export function useCarData() {
     };
   }, []);
 
-  return { carData, isConnected };
+  return { carData, routeHistory, isConnected };
 }

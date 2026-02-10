@@ -1,39 +1,78 @@
 import { WebSocketServer } from 'ws';
+import { createServer } from 'http';
 
-const wss = new WebSocketServer({ port: 8080 });
+const PORT = process.env.PORT || 8080;
 
-const STATUSES = ['moving', 'moving', 'moving', 'idle', 'stopped'];
-let lat = 19.0760;
-let lng = 72.8777;
+const API_URL =
+  'https://cosmicagps.com/tracking/api/location/acecfdb5d01220ff343a646f4314b751/353742376437570/json';
+
+// Fetch vehicle data from CosmicaGPS API
+async function fetchVehicleData() {
+  try {
+    const res = await fetch(API_URL);
+    const data = await res.json();
+
+    if (!Array.isArray(data) || data.length === 0) {
+      console.error('Unexpected API response:', data);
+      return null;
+    }
+
+    const vehicle = data[0];
+
+    // Derive status from speed and acc_status
+    let status = 'stopped';
+    if (vehicle.speed > 0) {
+      status = 'moving';
+    } else if (vehicle.acc_status === 1) {
+      status = 'idle';
+    }
+
+    return {
+      car_id: vehicle.vehicleName || vehicle.imei,
+      imei: vehicle.imei,
+      latitude: vehicle.lat,
+      longitude: vehicle.lng,
+      speed_kmh: vehicle.speed,
+      status,
+      heading: vehicle.heading,
+      altitude: vehicle.altitude,
+      odometer: vehicle.odometer,
+      todays_distance: vehicle.todays_distance,
+      device_type: vehicle.deviceType,
+      acc_status: vehicle.acc_status,
+      agetime: vehicle.agetime,
+      datetime: vehicle.datetime,
+      timestamp: new Date().toISOString(),
+    };
+  } catch (err) {
+    console.error('Failed to fetch from API:', err.message);
+    return null;
+  }
+}
+
+// Create HTTP server (required by Render for health checks)
+const server = createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('WebSocket server is running');
+});
+
+const wss = new WebSocketServer({ server });
 
 wss.on('connection', (ws) => {
   console.log('Client connected');
 
-  const sendUpdate = () => {
-    const status = STATUSES[Math.floor(Math.random() * STATUSES.length)];
-    const isMoving = status === 'moving';
+  const sendUpdate = async () => {
+    const data = await fetchVehicleData();
 
-    if (isMoving) {
-      lat += (Math.random() - 0.5) * 0.006;
-      lng += (Math.random() - 0.5) * 0.006;
+    if (data && ws.readyState === ws.OPEN) {
+      ws.send(JSON.stringify(data));
+      console.log(
+        `Sent: ${data.status} @ ${data.latitude}, ${data.longitude} | ${data.speed_kmh} km/h | ${data.agetime}`
+      );
     }
 
-    const data = {
-      car_id: 'CAR-001',
-      latitude: parseFloat(lat.toFixed(6)),
-      longitude: parseFloat(lng.toFixed(6)),
-      speed_kmh: isMoving ? Math.round(Math.random() * 100 + 20) : 0,
-      status,
-      heading: Math.round(Math.random() * 360),
-      timestamp: new Date().toISOString(),
-    };
-
-    ws.send(JSON.stringify(data));
-    console.log(`Sent: ${data.status} @ ${data.latitude}, ${data.longitude} | ${data.speed_kmh} km/h`);
-
-    // Schedule next update in random 1-10 seconds
-    const delay = Math.floor(Math.random() * 9000 + 1000);
-    ws.timer = setTimeout(sendUpdate, delay);
+    // Poll every 5 seconds
+    ws.timer = setTimeout(sendUpdate, 5000);
   };
 
   sendUpdate();
@@ -44,5 +83,7 @@ wss.on('connection', (ws) => {
   });
 });
 
-console.log('WebSocket mock server running on ws://localhost:8080');
-
+server.listen(PORT, () => {
+  console.log(`WebSocket server running on port ${PORT}`);
+  console.log(`Fetching live data from: ${API_URL}`);
+});

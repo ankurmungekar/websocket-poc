@@ -4,7 +4,7 @@ import { useCarData } from './hooks/useCarData';
 import './App.css';
 
 function App() {
-  const { carData, isConnected } = useCarData();
+  const { carData, routeHistory, isConnected } = useCarData();
 
   return (
     <div className="app-container">
@@ -13,7 +13,7 @@ function App() {
         <code className="raw-data-json">{JSON.stringify(carData)}</code>
       </div>
       <div className="map-wrapper">
-        <CarMap carData={carData} />
+        <CarMap carData={carData} routeHistory={routeHistory} />
         <CarStatus carData={carData} isConnected={isConnected} />
       </div>
     </div>

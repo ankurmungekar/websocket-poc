@@ -2,7 +2,7 @@
 
 A real-time car tracking proof-of-concept that displays a car moving on a map using WebSocket for live data updates — no page refresh needed.
 
-**Tech Stack:** React + Vite, Leaflet (OpenStreetMap), WebSocket, Node.js mock server
+**Tech Stack:** React + Vite, Google Maps, WebSocket, Node.js mock server
 
 ## Prerequisites
 
@@ -47,7 +47,7 @@ Navigate to [http://localhost:5173](http://localhost:5173)
 
 You will see:
 - A raw data bar at the top showing live JSON from the WebSocket server
-- A map centered on Mumbai with a car marker that moves in real time
+- A Google Map centered on Mumbai with a car marker that moves in real time
 - A status panel (top-right) showing car telemetry details
 
 ## Project Structure
