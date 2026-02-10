@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 
-// Use environment variable for production, fallback to localhost for dev
-const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8080';
+// Use environment variable for override, fallback to Railway production URL
+const WS_URL = import.meta.env.VITE_WS_URL || 'wss://websocket-poc-production.up.railway.app';
 
 const INITIAL_CAR = {
   car_id: '353742376437570',
