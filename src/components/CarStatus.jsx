@@ -99,6 +99,19 @@ export default function CarStatus({ carData, isConnected }) {
           <span className="status-label">Last GPS Time</span>
           <span className="status-value">{carData.datetime || '--'}</span>
         </div>
+
+        <div className="status-row last-refreshed">
+          <span className="status-label">Last Updated</span>
+          <span className="status-value">
+            {carData.timestamp
+              ? new Date(carData.timestamp).toLocaleTimeString('en-IN', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  second: '2-digit',
+                })
+              : '--'}
+          </span>
+        </div>
       </div>
     </div>
   );
