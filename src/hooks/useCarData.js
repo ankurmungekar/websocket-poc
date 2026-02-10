@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 
-// ===== FLAG: set to true to use local server, false for Railway production =====
-const USE_LOCAL_SERVER = true;
+// ===== FLAG: set to true for local dev, false for deployed (Netlify + Railway) =====
+const USE_LOCAL_SERVER = false;
 
 const WS_URL = USE_LOCAL_SERVER
   ? 'ws://localhost:8080'

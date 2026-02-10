@@ -124,6 +124,7 @@ export default function CarMap({ carData, routeHistory }) {
         defaultZoom={15}
         mapId="car-tracker-map"
         style={{ height: '100%', width: '100%' }}
+        gestureHandling="greedy"
       >
         <PanToCenter position={position} />
         <RoutePolyline routeHistory={routeHistory} />
