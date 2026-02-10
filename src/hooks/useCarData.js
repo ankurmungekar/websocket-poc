@@ -23,9 +23,7 @@ const INITIAL_CAR = {
 
 export function useCarData() {
   const [carData, setCarData] = useState(INITIAL_CAR);
-  const [routeHistory, setRouteHistory] = useState([
-    { lat: INITIAL_CAR.latitude, lng: INITIAL_CAR.longitude, timestamp: INITIAL_CAR.timestamp, status: INITIAL_CAR.status },
-  ]);
+  const [routeHistory, setRouteHistory] = useState([]);
   const [isConnected, setIsConnected] = useState(false);
   const wsRef = useRef(null);
   const reconnectTimeout = useRef(null);
