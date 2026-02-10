@@ -4,7 +4,7 @@ import { createServer } from 'http';
 const PORT = process.env.PORT || 8080;
 
 // ===== TESTING FLAG: set to true to simulate car movement, false for real data =====
-const SIMULATE_MOVEMENT = true;
+const SIMULATE_MOVEMENT = false;
 
 const API_URL =
   'https://cosmicagps.com/tracking/api/location/acecfdb5d01220ff343a646f4314b751/353742376437570/json';
