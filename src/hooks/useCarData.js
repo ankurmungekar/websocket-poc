@@ -1,7 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 
-// Use environment variable for override, fallback to Railway production URL
-const WS_URL = import.meta.env.VITE_WS_URL || 'wss://websocket-poc-production.up.railway.app';
+// ===== FLAG: set to true to use local server, false for Railway production =====
+const USE_LOCAL_SERVER = true;
+
+const WS_URL = USE_LOCAL_SERVER
+  ? 'ws://localhost:8080'
+  : 'wss://websocket-poc-production.up.railway.app';
 
 const INITIAL_CAR = {
   car_id: '353742376437570',

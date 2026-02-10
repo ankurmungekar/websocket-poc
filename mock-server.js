@@ -3,8 +3,16 @@ import { createServer } from 'http';
 
 const PORT = process.env.PORT || 8080;
 
+// ===== TESTING FLAG: set to true to simulate car movement, false for real data =====
+const SIMULATE_MOVEMENT = true;
+
 const API_URL =
   'https://cosmicagps.com/tracking/api/location/acecfdb5d01220ff343a646f4314b751/353742376437570/json';
+
+// Track cumulative offset for simulated movement
+let latOffset = 0;
+let lngOffset = 0;
+let pollCount = 0;
 
 // Fetch vehicle data from CosmicaGPS API
 async function fetchVehicleData() {
@@ -19,7 +27,32 @@ async function fetchVehicleData() {
 
     const vehicle = data[0];
 
-    // Derive status from speed and acc_status
+    // If testing, manipulate data to simulate driving
+    if (SIMULATE_MOVEMENT) {
+      pollCount++;
+      latOffset += (Math.random() - 0.5) * 0.006;
+      lngOffset += (Math.random() - 0.5) * 0.006;
+
+      return {
+        car_id: vehicle.vehicleName || vehicle.imei,
+        imei: vehicle.imei,
+        latitude: parseFloat((vehicle.lat + latOffset).toFixed(6)),
+        longitude: parseFloat((vehicle.lng + lngOffset).toFixed(6)),
+        speed_kmh: Math.round(Math.random() * 100 + 20),
+        status: 'moving',
+        heading: Math.round(Math.random() * 360),
+        altitude: vehicle.altitude,
+        odometer: parseFloat((vehicle.odometer + pollCount * 0.3).toFixed(2)),
+        todays_distance: parseFloat((vehicle.todays_distance + pollCount * 0.3).toFixed(2)),
+        device_type: vehicle.deviceType,
+        acc_status: 1,
+        agetime: 'just now',
+        datetime: new Date().toISOString().replace('T', ' ').slice(0, 19),
+        timestamp: new Date().toISOString(),
+      };
+    }
+
+    // Real data — no manipulation
     let status = 'stopped';
     if (vehicle.speed > 0) {
       status = 'moving';
